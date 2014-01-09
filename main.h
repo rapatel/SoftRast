@@ -158,7 +158,7 @@ public:
 class Pixel
 {
 public:
-    Pixel(uint x = 0, uint y = 0) :
+    Pixel(float x = 0.f, float y = 0.f) :
         m_x(x),
         m_y(y)
     {
@@ -166,15 +166,18 @@ public:
     ~Pixel()
     {
     }
-    void setLocation(uint x_pos, uint y_pos)
-    {
-        m_x = x_pos;
-        m_y = y_pos;
-    }
+    void setCenterLoc(float x_pos, float y_pos);
 public:
     Color m_color;
-    uint m_x, m_y;
+    float m_x, m_y;
 };
+
+//  sets center location of pixel
+void Pixel::setCenterLoc(float x_pos, float y_pos)
+{
+    m_x = x_pos;
+    m_y = y_pos;
+}
 
 
 //-----------------------------------------------------------------------------
@@ -192,7 +195,7 @@ public:
         {
             for (uint j = 0; j < m_width; j++)
             {
-                m_pixels[i*m_width + j].setLocation(j, i);
+                m_pixels[i*m_width + j].setCenterLoc(((float)j+0.5f), ((float)i+0.5f));
             }
         }
     }
