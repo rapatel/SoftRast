@@ -11,13 +11,6 @@ void TriRasterizer::drawTriangle(const Vertex &v1,
                                  const Vertex &v2,
                                  const Vertex &v3)
 {
-    // straight line
-    if ((v1.m_Y == v2.m_Y &&  v2.m_Y== v3.m_Y) ||
-        (v1.m_X == v2.m_X && v2.m_X == v3.m_X) )
-    {
-        return;
-    }
-
     // create 3 edges
     Edge edges[3] = {
         Edge(v1, v2),

@@ -10,6 +10,7 @@ class Edge;
 class Span;
 class TriRasterizer;
 class Window;
+class Pixel;
 
 
 //-----------------------------------------------------------------------------
@@ -152,6 +153,31 @@ public:
 
 
 //-----------------------------------------------------------------------------
+// Pixel class: represent a pixel
+//-----------------------------------------------------------------------------
+class Pixel
+{
+public:
+    Pixel(uint x = 0, uint y = 0) :
+        m_x(x),
+        m_y(y)
+    {
+    }
+    ~Pixel()
+    {
+    }
+    void setLocation(uint x_pos, uint y_pos)
+    {
+        m_x = x_pos;
+        m_y = y_pos;
+    }
+public:
+    Color m_color;
+    uint m_x, m_y;
+};
+
+
+//-----------------------------------------------------------------------------
 // Window class: represent window coordinates
 //-----------------------------------------------------------------------------
 class Window
@@ -161,15 +187,23 @@ public:
         m_width(w),
         m_height(h)
     {
-        m_window = new Color[m_width * m_height];
+        m_pixels = new Pixel[m_width * m_height];
+        for (uint i = 0; i < m_height; i++)
+        {
+            for (uint j = 0; j < m_width; j++)
+            {
+                m_pixels[i*m_width + j].setLocation(j, i);
+            }
+        }
     }
     ~Window()
     {
-        delete[] m_window;
+        delete[] m_pixels;
     }
 public:
     uint m_width, m_height; // in pixels
-    Color* m_window;
+    Pixel* m_pixels;
 };
+
 
 #endif
