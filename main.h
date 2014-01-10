@@ -15,8 +15,8 @@ class Vertex;
 class Color;
 class Edge;
 class Span;
-class TriRasterizer;
 class Window;
+class TriRasterizer;
 class Pixel;
 
 
@@ -107,15 +107,34 @@ Edge::~Edge()
 class Span
 {
 public:
-    Span(Color &color1, Color &color2, float x1, float x2);
+    Span(Color &color1, Color &color2, float x1, float x2, float y);
+    Span() :
+        x1(0),
+        x2(0),
+        y(0)
+    {
+    }
     ~Span();
+    void setSpan(Color &color1, Color &color2, float x1, float x2, float y);
 public:
     Color color1, color2;
-    float x1, x2;
+    float x1, x2, y;
 };
 
-Span::Span(Color &color1, Color &color2, float x1, float x2)
+Span::Span(Color &color1, Color &color2, float x1, float x2, float y)
 {
+    setSpan(color1, color2, x1, x2, y);
+}
+
+Span::~Span()
+{
+}
+
+// sets the values of the span
+void Span::setSpan(Color &color1, Color &color2, float x1, float x2, float y)
+{
+    this->y = y;
+
     // left-most point = point1
     if (x1 <= x2)
     {
@@ -134,37 +153,6 @@ Span::Span(Color &color1, Color &color2, float x1, float x2)
         this->color1 = color2;
     }
 }
-
-Span::~Span()
-{
-}
-
-
-//-----------------------------------------------------------------------------
-// TriRasterizer class: rasterize a triangle
-//-----------------------------------------------------------------------------
-class TriRasterizer
-{
-public:
-    TriRasterizer()
-    {
-    }
-    ~TriRasterizer()
-    {
-    }
-    float getNextPixCenter(float val)
-    {
-        float tmp = ceil(val*2)/2;
-        float intpart(0.f);
-        float fractpart = modf (tmp, &intpart);
-
-        return (fractpart == 0.5f) ? tmp : tmp + 0.5f;
-    }
-public:
-    void drawTriangle(const Vertex &v1, const Vertex &v2, const Vertex &v3);
-    void drawSpansBetweenEdges(const Edge &e1, const Edge &e2);
-    void drawSpan(const Span &span, int y);
-};
 
 
 //-----------------------------------------------------------------------------
@@ -237,6 +225,35 @@ void Window::drawWindow()
         cout << endl;
     }
 }
+
+//-----------------------------------------------------------------------------
+// TriRasterizer class: rasterize a triangle
+//-----------------------------------------------------------------------------
+class TriRasterizer
+{
+public:
+    TriRasterizer(uint w, uint h)
+    {
+        m_window = new Window(w, h);
+    }
+    ~TriRasterizer()
+    {
+        delete[] m_window;
+    }
+    float getNextPixCenter(float val)
+    {
+        float tmp = ceil(val*2)/2;
+        float intpart(0.f);
+        float fractpart = modf (tmp, &intpart);
+
+        return (fractpart == 0.5f) ? tmp : tmp + 0.5f;
+    }
+    void drawTriangle(const Vertex &v1, const Vertex &v2, const Vertex &v3);
+    void drawSpansBetweenEdges(const Edge &e1, const Edge &e2);
+    void drawSpan(const Span &span);
+public:
+    Window* m_window;
+};
 
 
 #endif

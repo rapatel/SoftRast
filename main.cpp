@@ -40,20 +40,47 @@ void TriRasterizer::drawTriangle(const Vertex &v1,
     drawSpansBetweenEdges(edges[longEdge], edges[shortEdge1]);
 }
 
-void TriRasterizer::drawSpansBetweenEdges(const Edge &e1, const Edge &e2)
+void TriRasterizer::drawSpansBetweenEdges(const Edge &longEdge, const Edge &shortEdge)
 {
-    if(e2.m_V1.m_Y == e2.m_V2.m_Y) return; // horizontal edge, return
+    if(shortEdge.m_V1.m_Y == shortEdge.m_V2.m_Y) return; // horizontal edge, return
 
-    float currY = getNextPixCenter(e2.m_V1.m_Y); // TODO: snap to next pixel center
-    float topY = e2.m_V2.m_Y;
+    // snap current y-axis val to next pixel center
+    // using short edge as the reference top
+    float currY = getNextPixCenter(shortEdge.m_V1.m_Y);
+    float topY = shortEdge.m_V2.m_Y;
+
+    // get current x-axis vals
+    float currLongX = longEdge.m_V1.m_X;
+    float currShortX = shortEdge.m_V1.m_X;
+
+    // get current colors
+    Color currLongColor = longEdge.m_V1.m_Color;
+    Color currShortColor = longEdge.m_V1.m_Color;
+
+    // get inverse slopes
+    float shortInvSlope = (shortEdge.m_V2.m_X == shortEdge.m_V1.m_X) ? 0.f :
+        (shortEdge.m_V2.m_X-shortEdge.m_V1.m_X)/(shortEdge.m_V2.m_Y-shortEdge.m_V1.m_Y);
+    float longInvSlope = (longEdge.m_V2.m_X == longEdge.m_V1.m_X) ? 0.f :
+        (longEdge.m_V2.m_X-longEdge.m_V1.m_X)/(longEdge.m_V2.m_Y-longEdge.m_V1.m_Y);
+
+    // move along edges
+    Span span;
     while(currY < topY)
     {
-        // TODO: calculate span points/colors
-        currY = getNextPixCenter(e2.m_V1.m_Y);
+        // interpolate x vals, colors
+        currShortX += (currY-shortEdge.m_V1.m_Y) * shortInvSlope;
+        currLongX += (currY-longEdge.m_V1.m_Y) * longInvSlope;
+
+        // set & draw span
+        span.setSpan(currShortColor, currLongColor, currShortX, currLongX, currY);
+        drawSpan(span);
+
+        // snap to next valid pixel
+        currY = getNextPixCenter(shortEdge.m_V1.m_Y);
     }
 }
 
-void TriRasterizer::drawSpan(const Span &span, int y)
+void TriRasterizer::drawSpan(const Span &span)
 {
 }
 
