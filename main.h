@@ -1,6 +1,13 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <string>
+#include <iostream>
+#include <stdlib.h>
+#include <math.h>
+
+using namespace std;
+
 typedef unsigned short ushort;
 typedef unsigned int uint;
 
@@ -145,6 +152,14 @@ public:
     ~TriRasterizer()
     {
     }
+    float getNextPixCenter(float val)
+    {
+        float tmp = ceil(val*2)/2;
+        float intpart(0.f);
+        float fractpart = modf (tmp, &intpart);
+
+        return (fractpart == 0.5f) ? tmp : tmp + 0.5f;
+    }
 public:
     void drawTriangle(const Vertex &v1, const Vertex &v2, const Vertex &v3);
     void drawSpansBetweenEdges(const Edge &e1, const Edge &e2);
@@ -203,10 +218,25 @@ public:
     {
         delete[] m_pixels;
     }
+    void drawWindow();
 public:
     uint m_width, m_height; // in pixels
     Pixel* m_pixels;
 };
+
+// traverses window top-down
+void Window::drawWindow()
+{
+    for (uint i = m_height; i > 0;)
+    {
+        i--;
+        for (uint j = 0; j < m_width; j++)
+        {
+            printf("(%.2f,%.2f)", m_pixels[i*m_width + j].m_x, m_pixels[i*m_width + j].m_y);
+        }
+        cout << endl;
+    }
+}
 
 
 #endif
