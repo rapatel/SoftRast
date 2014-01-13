@@ -244,7 +244,7 @@ public:
     {
         float tmp = ceil(val*2)/2;
         float intpart(0.f);
-        float fractpart = modf (tmp, &intpart);
+        float fractpart = modf(tmp, &intpart);
 
         return (fractpart == 0.5f) ? tmp : tmp + 0.5f;
     }

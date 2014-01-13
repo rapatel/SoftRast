@@ -65,7 +65,7 @@ void TriRasterizer::drawSpansBetweenEdges(const Edge &longEdge, const Edge &shor
 
     // move along edges
     Span span;
-    while(currY < topY)
+    while (currY < topY)
     {
         // interpolate x vals, colors
         currShortX  += (currY-shortEdge.m_V1.m_Y) * shortInvSlope;
@@ -78,13 +78,23 @@ void TriRasterizer::drawSpansBetweenEdges(const Edge &longEdge, const Edge &shor
         span.setSpan(currShortColor, currLongColor, currShortX, currLongX, currY);
         drawSpan(span);
 
-        // snap to next valid pixel
-        currY = getNextPixCenter(shortEdge.m_V1.m_Y);
+        currY += 1.f;
     }
 }
 
 void TriRasterizer::drawSpan(const Span &span)
 {
+    // snap current x-axis val to next pixel center
+    // moving right
+    float currX = getNextPixCenter(span.x1);
+
+    // move horizontal along span
+    while (currX <= span.x2)
+    {
+        //interpolateColor();
+        //drawPixel(currX, span.y,);
+        //currX += 1.f;
+    }
 }
 
 void TriRasterizer::interpolateColor(const float x,
