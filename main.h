@@ -251,7 +251,9 @@ public:
     void drawTriangle(const Vertex &v1, const Vertex &v2, const Vertex &v3);
     void drawSpansBetweenEdges(const Edge &e1, const Edge &e2);
     void drawSpan(const Span &span);
-    void interpolateColor(const float x, const float y, const Edge &e, Color &c);
+    void interpolateColor(float curP, float srcP,
+                          float desP, const Color &srcC1,
+                          const Color &desC2, Color &intC);
 public:
     Window* m_window;
 };

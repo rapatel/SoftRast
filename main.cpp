@@ -71,8 +71,11 @@ void TriRasterizer::drawSpansBetweenEdges(const Edge &longEdge, const Edge &shor
         currShortX  += (currY-shortEdge.m_V1.m_Y) * shortInvSlope;
         currLongX   += (currY-longEdge.m_V1.m_Y) * longInvSlope;
 
-        interpolateColor(currShortX, currY, shortEdge, currShortColor);
-        interpolateColor(currLongX, currY, shortEdge, currLongColor);
+        // TODO: only calc interpolatants once
+        interpolateColor(currY, shortEdge.m_V1.m_Y, shortEdge.m_V2.m_Y,
+            shortEdge.m_V1.m_Color, shortEdge.m_V2.m_Color, currShortColor);
+        interpolateColor(currY, longEdge.m_V1.m_Y, longEdge.m_V2.m_Y,
+            longEdge.m_V1.m_Color, longEdge.m_V2.m_Color, currLongColor);
 
         // set & draw span
         span.setSpan(currShortColor, currLongColor, currShortX, currLongX, currY);
@@ -89,24 +92,31 @@ void TriRasterizer::drawSpan(const Span &span)
     float currX = getNextPixCenter(span.x1);
 
     // move horizontal along span
+    Color currColor;
     while (currX <= span.x2)
     {
-        //interpolateColor();
+        // TODO: only calc interpolate once
+        interpolateColor(currX, span.x1, span.x2,
+            span.color1, span.color2, currColor);
+
+        // TODO: draw to screen
         //drawPixel(currX, span.y,);
-        //currX += 1.f;
+
+        currX += 1.f;
     }
 }
 
-void TriRasterizer::interpolateColor(const float x,
-                                     const float y,
-                                     const Edge &e,
-                                     Color &c)
+void TriRasterizer::interpolateColor(float curP, float srcP,
+                                     float desP, const Color &srcC1,
+                                     const Color &desC2, Color &intC)
 {
-    // interpolate final color of a point on an edge
-    float frac = abs((y-e.m_V1.m_Y)/(e.m_V2.m_Y-e.m_V2.m_Y));
-    c.r = (ushort)(((float)e.m_V1.m_Color.r)*(1-frac) + ((float)e.m_V2.m_Color.r)*frac);
-    c.g = (ushort)(((float)e.m_V1.m_Color.g)*(1-frac) + ((float)e.m_V2.m_Color.g)*frac);
-    c.b = (ushort)(((float)e.m_V1.m_Color.b)*(1-frac) + ((float)e.m_V2.m_Color.b)*frac);
+    // calculate frac of distance traveled
+    float frac = abs((curP-srcP)/(desP-srcP));
+
+    // interpolate color
+    intC.r = (ushort)(((float)srcC1.r)*(1-frac) + ((float)desC2.r)*frac);
+    intC.g = (ushort)(((float)srcC1.g)*(1-frac) + ((float)desC2.g)*frac);
+    intC.b = (ushort)(((float)srcC1.b)*(1-frac) + ((float)desC2.b)*frac);
 }
 
 void main()
