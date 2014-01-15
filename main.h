@@ -8,17 +8,18 @@
 
 using namespace std;
 
-typedef unsigned short ushort;
+typedef unsigned char uchar;
 typedef unsigned int uint;
 
 class Vertex;
 class Color;
 class Edge;
 class Span;
-class Window;
 class TriRasterizer;
 class Pixel;
 
+#define WIDTH 1024
+#define HEIGHT 1024
 
 //-----------------------------------------------------------------------------
 // Color class: Defines the color of a vertex
@@ -26,13 +27,14 @@ class Pixel;
 class Color
 {
 public:
-    Color(ushort r = 0, ushort g = 0, ushort b = 0);
+    Color(uchar r = 0, uchar g = 0, uchar b = 0);
     ~Color();
 public:
-    ushort r, g, b;
+    void setColor(uchar r, uchar g, uchar b);
+    uchar r, g, b;
 };
 
-Color::Color(ushort r, ushort g, ushort b) :
+Color::Color(uchar r, uchar g, uchar b) :
     r(r),
     g(g),
     b(b)
@@ -41,6 +43,13 @@ Color::Color(ushort r, ushort g, ushort b) :
 
 Color::~Color()
 {
+}
+
+void Color::setColor(uchar r, uchar g, uchar b)
+{
+    this->r = r;
+    this->g = g;
+    this->b = b;
 }
 
 //-----------------------------------------------------------------------------
@@ -169,27 +178,39 @@ public:
     ~Pixel()
     {
     }
-    void setCenterLoc(float x_pos, float y_pos);
+    void setPixelLoc(uint x_pos, uint y_pos);
+    void setPixelCol(const Color &color);
 public:
     Color m_color;
-    float m_x, m_y;
+    uint m_x, m_y;
+    float m_x_center, m_y_center; // center location
 };
 
-//  sets center location of pixel
-void Pixel::setCenterLoc(float x_pos, float y_pos)
+//  sets location of pixel
+void Pixel::setPixelLoc(uint x_pos, uint y_pos)
 {
     m_x = x_pos;
     m_y = y_pos;
+
+    // keep track of exact center
+    m_x_center = (float)x_pos + 0.5f;
+    m_y_center = (float)y_pos + 0.5f;
+}
+
+// sets pixel color
+void Pixel::setPixelCol(const Color &color)
+{
+    m_color = color;
 }
 
 
 //-----------------------------------------------------------------------------
-// Window class: represent window coordinates
+// TriRasterizer class: rasterize a triangle
 //-----------------------------------------------------------------------------
-class Window
+class TriRasterizer
 {
 public:
-    Window(uint w, uint h) :
+    TriRasterizer(uint w, uint h) :
         m_width(w),
         m_height(h)
     {
@@ -198,47 +219,13 @@ public:
         {
             for (uint j = 0; j < m_width; j++)
             {
-                m_pixels[i*m_width + j].setCenterLoc(((float)j+0.5f), ((float)i+0.5f));
+                m_pixels[i*m_width + j].setPixelLoc(j, i);
             }
         }
     }
-    ~Window()
-    {
-        delete[] m_pixels;
-    }
-    void drawWindow();
-public:
-    uint m_width, m_height; // in pixels
-    Pixel* m_pixels;
-};
-
-// traverses window top-down
-void Window::drawWindow()
-{
-    for (uint i = m_height; i > 0;)
-    {
-        i--;
-        for (uint j = 0; j < m_width; j++)
-        {
-            printf("(%.2f,%.2f)", m_pixels[i*m_width + j].m_x, m_pixels[i*m_width + j].m_y);
-        }
-        cout << endl;
-    }
-}
-
-//-----------------------------------------------------------------------------
-// TriRasterizer class: rasterize a triangle
-//-----------------------------------------------------------------------------
-class TriRasterizer
-{
-public:
-    TriRasterizer(uint w, uint h)
-    {
-        m_window = new Window(w, h);
-    }
     ~TriRasterizer()
     {
-        delete[] m_window;
+        delete[] m_pixels;
     }
     float getNextPixCenter(float val)
     {
@@ -254,8 +241,25 @@ public:
     void interpolateColor(float curP, float srcP,
                           float desP, const Color &srcC1,
                           const Color &desC2, Color &intC);
-public:
-    Window* m_window;
+    void setPixel(uint x, uint y, const Color &color)
+    {
+        m_pixels[y*m_width + x].setPixelCol(color);
+    }
+    void fillPixels(uchar *pixels)
+    {
+        for (uint i = 0; i < m_height; i++)
+        {
+            for (uint j = 0; j < m_width; j++)
+            {
+                *pixels++ = m_pixels[i*m_width + j].m_color.r;
+                *pixels++ = m_pixels[i*m_width + j].m_color.g;
+                *pixels++ = m_pixels[i*m_width + j].m_color.b;
+            }
+        }
+    }
+private:
+    uint m_width, m_height; // in pixels
+    Pixel* m_pixels;
 };
 
 
